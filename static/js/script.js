@@ -48,29 +48,95 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Any additional interactivity or animations can be added here
+    // For example, smooth scrolling for the CTA button
+    document.querySelector('.cta-button').addEventListener('click', function() {
+        // Example smooth scroll to a specific section
+        document.querySelector('#entre-agora').scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
     const carousel = document.querySelector('.carousel');
     const items = document.querySelectorAll('.carousel-item');
-    const prevButton = document.querySelector('.carousel-control.prev');
-    const nextButton = document.querySelector('.carousel-control.next');
-    let currentIndex = 0;
+    let isDragging = false, startPos = 0, currentTranslate = 0, prevTranslate = 0;
+    let animationID, currentIndex = 0;
+    let autoPlayInterval;
+    let autoPlayTimeout;
 
-    function updateCarousel() {
-        const offset = -currentIndex * 100;
-        carousel.style.transform = `translateX(${offset}%)`;
+    function setPositionByIndex() {
+        currentTranslate = currentIndex * -carousel.clientWidth;
+        prevTranslate = currentTranslate;
+        setSliderPosition();
     }
 
-    prevButton.addEventListener('click', function() {
-        currentIndex = (currentIndex > 0) ? currentIndex - 1 : items.length - 1;
-        updateCarousel();
+    function setSliderPosition() {
+        carousel.style.transform = `translateX(${currentTranslate}px)`;
+    }
+
+    function animation() {
+        setSliderPosition();
+        if (isDragging) requestAnimationFrame(animation);
+    }
+
+    function touchStart(index) {
+        return function(event) {
+            currentIndex = index;
+            startPos = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+            isDragging = true;
+            animationID = requestAnimationFrame(animation);
+            carousel.style.cursor = 'grabbing';
+            clearInterval(autoPlayInterval); // Stop auto-play on drag
+            clearTimeout(autoPlayTimeout); // Clear any pending auto-play timeout
+        }
+    }
+
+    function touchEnd() {
+        isDragging = false;
+        cancelAnimationFrame(animationID);
+        carousel.style.cursor = 'grab';
+
+        const movedBy = currentTranslate - prevTranslate;
+        if (movedBy < -100 && currentIndex < items.length - 1) currentIndex += 1;
+        if (movedBy > 100 && currentIndex > 0) currentIndex -= 1;
+
+        setPositionByIndex();
+        autoPlayTimeout = setTimeout(() => {
+            autoPlayInterval = setInterval(autoPlay, 7000); // Restart auto-play after delay
+        }, 7000); // Restart auto-play after 7 seconds of inactivity
+    }
+
+    function touchMove(event) {
+        if (isDragging) {
+            const currentPosition = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+            currentTranslate = prevTranslate + currentPosition - startPos;
+        }
+    }
+
+    items.forEach((item, index) => {
+        const itemImage = item.querySelector('img');
+        itemImage.addEventListener('dragstart', (e) => e.preventDefault());
+
+        // Touch events
+        item.addEventListener('touchstart', touchStart(index));
+        item.addEventListener('touchend', touchEnd);
+        item.addEventListener('touchmove', touchMove);
+
+        // Mouse events
+        item.addEventListener('mousedown', touchStart(index));
+        item.addEventListener('mouseup', touchEnd);
+        item.addEventListener('mouseleave', touchEnd);
+        item.addEventListener('mousemove', touchMove);
     });
 
-    nextButton.addEventListener('click', function() {
-        currentIndex = (currentIndex < items.length - 1) ? currentIndex + 1 : 0;
-        updateCarousel();
-    });
+    window.addEventListener('resize', setPositionByIndex);
 
-    // Optional: Auto-play functionality
-    setInterval(function() {
-        nextButton.click();
-    }, 5000); // Change slide every 5 seconds
+    function autoPlay() {
+        currentIndex = (currentIndex + 1) % items.length;
+        setPositionByIndex();
+    }
+
+    autoPlayInterval = setInterval(autoPlay, 5000); // Change slide every 7 seconds
 });
