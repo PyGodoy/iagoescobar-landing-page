@@ -462,6 +462,7 @@ h1 {
 }
 
 .left-section p {
+    font-weight: bold;
     text-align: left;
     font-size: 1.125rem;
     opacity: 0.9;
@@ -519,6 +520,11 @@ h1 {
     font-weight: bold;
     font-size: 1rem;
     opacity: 0.7;
+}
+
+.pagaments {
+    width: 100%;
+    margin-top: 30px;
 }
 
 .cta-button {
@@ -865,6 +871,11 @@ h1 {
 
     .limited-offer {
         padding: 3rem 1.5rem;
+    }
+
+    .pagamentos {
+        width: 100%;
+        margin-top: 20px;
     }
 
     .attention {

@@ -58,13 +58,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const carousel = document.querySelector('.carousel');
     const items = document.querySelectorAll('.carousel-item');
     let isDragging = false, startPos = 0, currentTranslate = 0, prevTranslate = 0;
     let animationID, currentIndex = 0;
     let autoPlayInterval;
     let autoPlayTimeout;
+
+    // Set initial styles
+    carousel.style.cursor = 'grab';
+    carousel.style.transition = 'transform 0.3s ease-in-out';
 
     function setPositionByIndex() {
         currentTranslate = currentIndex * -carousel.clientWidth;
@@ -82,15 +86,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function touchStart(index) {
-        return function(event) {
+        return function (event) {
             currentIndex = index;
             startPos = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
             isDragging = true;
             animationID = requestAnimationFrame(animation);
             carousel.style.cursor = 'grabbing';
-            clearInterval(autoPlayInterval); // Stop auto-play on drag
-            clearTimeout(autoPlayTimeout); // Clear any pending auto-play timeout
-        }
+            clearAutoPlay(); // Stop auto-play on drag
+        };
     }
 
     function touchEnd() {
@@ -99,19 +102,24 @@ document.addEventListener('DOMContentLoaded', function() {
         carousel.style.cursor = 'grab';
 
         const movedBy = currentTranslate - prevTranslate;
-        if (movedBy < -100 && currentIndex < items.length - 1) currentIndex += 1;
-        if (movedBy > 100 && currentIndex > 0) currentIndex -= 1;
+        const threshold = carousel.clientWidth * 0.2; // 20% of the carousel width
+        if (movedBy < -threshold && currentIndex < items.length - 1) currentIndex += 1;
+        if (movedBy > threshold && currentIndex > 0) currentIndex -= 1;
 
         setPositionByIndex();
-        autoPlayTimeout = setTimeout(() => {
-            autoPlayInterval = setInterval(autoPlay, 7000); // Restart auto-play after delay
-        }, 7000); // Restart auto-play after 7 seconds of inactivity
+        restartAutoPlay(); // Restart auto-play
     }
 
     function touchMove(event) {
         if (isDragging) {
             const currentPosition = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
             currentTranslate = prevTranslate + currentPosition - startPos;
+
+            // Prevent dragging beyond limits
+            const maxTranslate = 0;
+            const minTranslate = (items.length - 1) * -carousel.clientWidth;
+            if (currentTranslate > maxTranslate) currentTranslate = maxTranslate;
+            if (currentTranslate < minTranslate) currentTranslate = minTranslate;
         }
     }
 
@@ -131,12 +139,28 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('mousemove', touchMove);
     });
 
-    window.addEventListener('resize', setPositionByIndex);
+    let resizeDebounce;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeDebounce);
+        resizeDebounce = setTimeout(setPositionByIndex, 300);
+    });
 
     function autoPlay() {
         currentIndex = (currentIndex + 1) % items.length;
         setPositionByIndex();
     }
 
-    autoPlayInterval = setInterval(autoPlay, 5000); // Change slide every 7 seconds
+    function clearAutoPlay() {
+        clearInterval(autoPlayInterval);
+        clearTimeout(autoPlayTimeout);
+    }
+
+    function restartAutoPlay() {
+        clearAutoPlay();
+        autoPlayTimeout = setTimeout(() => {
+            autoPlayInterval = setInterval(autoPlay, 5000);
+        }, 5000); // Restart auto-play after 5 seconds
+    }
+
+    autoPlayInterval = setInterval(autoPlay, 5000); // Start auto-play
 });
