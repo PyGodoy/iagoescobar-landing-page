@@ -186,12 +186,9 @@ h1 {
 
 .chat-bubble {
     position: absolute;
-    background: white;
     padding: 1rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 200px;
-}
+} /* EU TIREI*/
 
 .chat-1 {
     top: 10%;
@@ -199,8 +196,8 @@ h1 {
 }
 
 .chat-2 {
-    bottom: 30%;
-    right: -20%;
+    bottom: 2%;
+    right: 11%;
 }
 
 .method-main {
@@ -743,20 +740,34 @@ h1 {
 
     .method-illustration {
         width: 250px;
-        left: -15%;
+        left: -25%;
         z-index: 1;
     }
 
+    .character-img {
+        left: 4rem;
+    }
+
+    .mago1{
+        width: 200px;
+    }
+
+    .mago2{
+        width: 200px;
+    }
+
+
     .chat-bubble.chat-1 {
-        right: -20%; /* Even closer */
-        max-width: 120px; /* Smaller */
-        padding: 0.5rem; /* Reduce padding */
+        right: 30%; /* Even closer */
+        width: 10%;
+        height: 10%;
+        padding: 0rem; /* Reduce padding */
         font-size: 0.75rem; /* Smaller font */
     }
 
     .chat-bubble.chat-2 {
-        margin-bottom: 20px;
-        right: -15%; /* Even closer */
+        margin-bottom: 15px;
+        right: 10%; /* Even closer */
         max-width: 120px; /* Smaller */
         padding: 0.2rem; /* Reduce padding */
         font-size: 0.75rem; /* Smaller font */
